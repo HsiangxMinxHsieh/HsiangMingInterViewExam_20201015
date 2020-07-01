@@ -8,10 +8,11 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.ViewModel
 
 
-public abstract class BaseRecyclerViewDataBindingAdapter<T>(private val context: Context, private val layoutID: Int) :
-    androidx.recyclerview.widget.RecyclerView.Adapter<BaseRecyclerViewDataBindingAdapter<T>.ViewHolder>(), View.OnClickListener, View.OnLongClickListener, Filterable {
+public abstract class BaseRecyclerViewViewModelAdapter<T>(private val context: Context, private val layoutID: Int) :
+    androidx.recyclerview.widget.RecyclerView.Adapter<BaseRecyclerViewViewModelAdapter<T>.ViewHolder>(), View.OnClickListener, View.OnLongClickListener, Filterable {
     private var list = ArrayList<T>()
 
     private val myInflater: LayoutInflater? = null
@@ -62,8 +63,8 @@ public abstract class BaseRecyclerViewDataBindingAdapter<T>(private val context:
 
     inner class ViewHolder(var binding: ViewDataBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
         init {
-            binding.root.setOnClickListener(this@BaseRecyclerViewDataBindingAdapter)
-            binding.root.setOnLongClickListener(this@BaseRecyclerViewDataBindingAdapter)
+            binding.root.setOnClickListener(this@BaseRecyclerViewViewModelAdapter)
+            binding.root.setOnLongClickListener(this@BaseRecyclerViewViewModelAdapter)
             initViewHolder(this)
         }
     }

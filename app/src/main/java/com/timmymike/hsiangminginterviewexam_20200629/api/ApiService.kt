@@ -9,7 +9,7 @@ import retrofit2.http.Query
 interface ApiService {
     @Headers("Content-Type: application/json", "Accept: application/json")
     @GET("/users")
-    fun getUserData(@Query("since") since: Int = 0): Call<ArrayList<UserModel>>
+    fun getUserData(@Query("since") since: Int = 0): Call<UserModelList>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
     @GET("/users/{name}")
