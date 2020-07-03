@@ -14,6 +14,7 @@ import com.timmymike.hsiangminginterviewexam_20200629.tools.BaseSharePreference
 import com.timmymike.hsiangminginterviewexam_20200629.tools.logi
 import com.timmymike.hsiangminginterviewexam_20200629.tools.logiAllData
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
 
 
-        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context,3),context)).get(UserViewModel::class.java)
+        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context, 3), context)).get(UserViewModel::class.java)
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
 
@@ -114,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class Repository (val context: Context,val startGetIndex:Int): IRepository {
+    class Repository(val context: Context, val startGetIndex: Int) : IRepository {
         val TAG = javaClass.simpleName
         override fun getItems(itemCallback: IRepository.ItemCallback) {
 //            val list = mutableListOf<UserModel>()
@@ -126,10 +127,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class UserViewModel(private val repository: IRepository,val context: Context) : ViewModel() {
+    class UserViewModel(private val repository: IRepository, val context: Context) : ViewModel() {
         val TAG = javaClass.simpleName
-        var listLiveData: MutableLiveData<List<UserModel>> = MutableLiveData()
-        private var liveLoadingOver: MutableLiveData<Boolean> = MutableLiveData() // According this value To Show now Status
+        val listLiveData: MutableLiveData<List<UserModel>> by lazy { MutableLiveData<List<UserModel>>() }
+        val liveLoadingOver: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() } // According this value To Show now Status
 
         init {
             getData()
@@ -137,22 +138,26 @@ class MainActivity : AppCompatActivity() {
 
         private val alreadygetIndexArray by lazy { BaseSharePreference.getGetIndexs(context) }
         var limitGetIndex = 120
-        var startGetIndex = Integer.MAX_VALUE - 100
-        val empty: LiveData<Boolean> = Transformations.map(listLiveData) {
-            it.isEmpty() || it[0].id == 0
-        }
-        val loadingOver: LiveData<Boolean> = Transformations.map(liveLoadingOver) {
-            it
+        var startGetIndex = 0
+        val empty: LiveData<Boolean> by lazy {
+            Transformations.map(listLiveData) {
+                it.isEmpty() || it[0].id == 0
+            }
         }
 
         private fun getData() {
-            liveLoadingOver.value = false
+//            logi(TAG, "010 now loadingOver===>${loadingOver?:"nothing to show"}")
+            liveLoadingOver.postValue(false)
+//            logi(TAG, "020 now loadingOver===>$loadingOver")
             repository.getItems(object : IRepository.ItemCallback {
                 override fun onItemsResult(items: List<UserModel>) {
-
                     GlobalScope.launch {
                         listLiveData.postValue(items)
+                        delay(3000)
+                        liveLoadingOver.postValue(true)
                     }
+
+//                    logi(TAG, "030 now loadingOver===>$loadingOver")
                 }
             })
 
@@ -211,10 +216,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    class ViewModelFactory(private val repository: Repository,private val context: Context) : ViewModelProvider.Factory {
+    class ViewModelFactory(private val repository: Repository, private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-                return UserViewModel(repository,context) as T
+                return UserViewModel(repository, context) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
