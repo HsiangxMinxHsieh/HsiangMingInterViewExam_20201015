@@ -7,6 +7,9 @@
         <variable
             name="userModel"
             type="com.timmymike.hsiangminginterviewexam_20200629.api.UserModel" />
+        <variable
+            name="viewModel"
+            type="com.timmymike.hsiangminginterviewexam_20200629.MainActivity.UserViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,11 +33,11 @@
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:orientation="vertical"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
             app:layout_constraintTop_toTopOf="parent">
 

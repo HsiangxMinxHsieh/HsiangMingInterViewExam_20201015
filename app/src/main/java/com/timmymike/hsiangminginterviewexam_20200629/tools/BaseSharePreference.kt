@@ -18,9 +18,11 @@ object BaseSharePreference {
     /**have get Index list*/
     private val KEY_HAVE_GET_INDEX = "KEY_HAVE_GET_INDEX"
 
-    /** userData in list*/
+    /**userData in list*/
     private val KEY_USER_DATA_LIST = "KEY_USER_DATA_LIST"
 
+    /**get data start index*/
+    private val KEY_GET_DATA_START_INDEX = "KEY_GET_DATA_START_INDEX"
 
     fun getString(
         context: Context,
@@ -102,6 +104,16 @@ object BaseSharePreference {
         editor.commit()
     }
 
+    /** set Start Index in store*/
+    fun setNowGetIndex(context: Context, index: Int) {
+        putInt(context, KEY_GET_DATA_START_INDEX, index)
+    }
+
+    /**get Start Index by store*/
+    fun getNowStartIndex(context: Context): Int {
+        return getInt(context, KEY_GET_DATA_START_INDEX, 0)
+    }
+
     /** set indexes */
     fun setGetIndexs(context: Context, array: TreeSet<Int>) {
         putString(context, KEY_HAVE_GET_INDEX, Gson().toJson(array))
@@ -119,16 +131,16 @@ object BaseSharePreference {
     }
 
     /**save data from API*/
-    fun saveUserListData(context: Context, dataList: ArrayList<UserModel>?) {
+    fun saveUserSetData(context: Context, dataList: ArrayList<UserModel>?) {
         if (dataList == null || dataList.isEmpty())
             return
         for (user in dataList) {
-            putString(context, "KEY_USER_DATA_LIST ${user.id}", Gson().toJson(user))
+            putString(context, "$KEY_USER_DATA_LIST ${user.id}", Gson().toJson(user))
         }
     }
 
     /**get data from store*/
-    fun getUserListData(context: Context, startId: Int): TreeSet<UserModel> {
+    fun getUserSetData(context: Context, startId: Int): TreeSet<UserModel> {
         val TAG = "getUserListData"
         val set = TreeSet<UserModel>()
         var index = startId
@@ -137,13 +149,16 @@ object BaseSharePreference {
         while (set.size < 100 && getDataSuccess) {
 
             try {
-                val data = Gson().fromJson(getString(context, "KEY_USER_DATA_LIST $index", ""), UserModel::class.java) ?: UserModel(id = 0)
-                set.add(data).apply {
-                    getDataSuccess = this
-                    if (getDataSuccess)
-                        failCount = 0
+                val data = Gson().fromJson(getString(context, "$KEY_USER_DATA_LIST $index", ""), UserModel::class.java) ?: null
+                if (data != null) {
+                    set.add(data).apply {
+                        getDataSuccess = this
+                        if (getDataSuccess)
+                            failCount = 0
+                    }
+                } else {
+                    getDataSuccess = false
                 }
-
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -152,10 +167,11 @@ object BaseSharePreference {
             // avoid fail process
             if (!getDataSuccess)
                 failCount++
-
+//            logi(TAG, "getDataSuccess ==>$getDataSuccess,,,fail Count ===>$failCount")
             getDataSuccess = failCount <= 1000 //1000 is temp value ,it means that has fail 1000 times, then jump out this loop
         }
 
         return set
     }
+
 }

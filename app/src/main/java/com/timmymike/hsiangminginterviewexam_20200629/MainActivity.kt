@@ -2,21 +2,23 @@ package com.timmymike.hsiangminginterviewexam_20200629
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.timmymike.hsiangminginterviewexam_20200629.api.ApiConnect
 import com.timmymike.hsiangminginterviewexam_20200629.api.UserModel
-import com.timmymike.hsiangminginterviewexam_20200629.base.BaseRecyclerViewViewModelAdapter
 import com.timmymike.hsiangminginterviewexam_20200629.databinding.ActivityMainBinding
+import com.timmymike.hsiangminginterviewexam_20200629.databinding.AdapterUserListBinding
 import com.timmymike.hsiangminginterviewexam_20200629.tools.BaseSharePreference
+import com.timmymike.hsiangminginterviewexam_20200629.tools.bindImage
 import com.timmymike.hsiangminginterviewexam_20200629.tools.logi
 import com.timmymike.hsiangminginterviewexam_20200629.tools.logiAllData
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 
 class MainActivity : AppCompatActivity() {
     val TAG = javaClass.simpleName
@@ -41,67 +43,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        BaseSharePreference.setNowGetIndex(context, 0)
+        val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
+        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context, nowGetIndex), context)).get(UserViewModel::class.java)
 
-
-        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context, 3), context)).get(UserViewModel::class.java)
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
 
-        adapter = UserAdapter(context)
+        adapter = UserAdapter(viewModel)
         mainBinding.rvUserList.adapter = adapter
+        mainBinding.rvUserList.layoutManager = LinearLayoutManager(context).apply {
+            orientation = RecyclerView.VERTICAL
+        }
+
+        viewModel.listLiveData.observe(this,
+            Observer<List<UserModel>> {
+                logi(TAG,"now Data is===>$it")
+                adapter.notifyDataSetChanged()
+            })
 
     }
-
-
-//    private fun getData() {
-//        mBinding.tvNoDataFound.visibility = View.GONE
-//        mBinding.pgLoading.visibility = View.VISIBLE
-//        GlobalScope.launch {
-//            //First need check BaseSharePreference have get this Index,If not , call API
-//            logi(TAG, "alreadygetIndexArray is ===>$alreadygetIndexArray")
-//            if (!alreadygetIndexArray.contains(startGetIndex))
-//                getFromApiUserData(startGetIndex)
-//
-//            // printData To check
-//            val dataSet = BaseSharePreference.getUserListData(context, startGetIndex)
-//            logi(TAG, "The Stored Data is Below,total ${dataSet.size} count")
-//            dataSet.logiAllData()
-//
-//            if (dataSet.size < 100)
-//                getFromApiUserData(dataSet.last().id)
-//
-//            Handler(Looper.getMainLooper()).post {
-//                mBinding.pgLoading.visibility = View.GONE
-//                if(dataSet.isEmpty())
-//                    mBinding.tvNoDataFound.visibility = View.VISIBLE
-//            }
-//        }
-//    }
-//
-//    @Throws(Exception::class)
-//    private fun getFromApiUserData(start: Int): ResponseBody? {
-//        if (alreadygetIndexArray.contains(start))
-//            return null
-//        val cell = ApiConnect.getService(context).getUserData(start)
-//        logi(TAG, "Start Call API,To Get getFromApiUserData Method")
-//
-//        val response = cell.execute()
-//        logi(TAG, "getFromApiUserData Send Data is===>${response ?: "null"}")
-//        if (response.isSuccessful) {
-//            logi(TAG, "getFromApiUserData Get Data is Below,total ${response?.body()?.size ?: 0} count")
-//            BaseSharePreference.saveUserListData(context, response?.body())
-//
-//            // store have get Index to BaseSharePreference
-//
-//            alreadygetIndexArray.add(start)
-//            BaseSharePreference.setGetIndexs(context, alreadygetIndexArray)
-//
-//            response?.body()?.logiAllData()
-//            if (limitGetIndex > start)
-//                getFromApiUserData(start + 30)
-//        }
-//        return response.errorBody()
-//    }
 
     /**======== MVVM ========*/
 
@@ -111,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         interface ItemCallback {
 
-            fun onItemsResult(items: List<UserModel>)
+            fun onItemsResult(items: ArrayList<UserModel>)
         }
     }
 
@@ -120,10 +81,13 @@ class MainActivity : AppCompatActivity() {
         override fun getItems(itemCallback: IRepository.ItemCallback) {
 //            val list = mutableListOf<UserModel>()
             // printData To check
-            val dataSet = BaseSharePreference.getUserListData(context, startGetIndex)
+//            logi(TAG, "startGetIndex ===>$startGetIndex")
+            val dataSet = BaseSharePreference.getUserSetData(context, startGetIndex)
 //            logi(TAG, "The Stored Data is Below,total ${dataSet.size} count")
 //            dataSet.logiAllData()
-            itemCallback.onItemsResult(dataSet.toList())
+            val arr = ArrayList<UserModel>()
+            arr.addAll(dataSet)
+            itemCallback.onItemsResult(arr)
         }
     }
 
@@ -137,61 +101,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         private val alreadygetIndexArray by lazy { BaseSharePreference.getGetIndexs(context) }
+
         var limitGetIndex = 120
-        var startGetIndex = 0
-        val empty: LiveData<Boolean> by lazy {
-            Transformations.map(listLiveData) {
-                it.isEmpty() || it[0].id == 0
-            }
-        }
 
         private fun getData() {
-//            logi(TAG, "010 now loadingOver===>${loadingOver?:"nothing to show"}")
             liveLoadingOver.postValue(false)
-//            logi(TAG, "020 now loadingOver===>$loadingOver")
             repository.getItems(object : IRepository.ItemCallback {
-                override fun onItemsResult(items: List<UserModel>) {
+                override fun onItemsResult(items: ArrayList<UserModel>) {
                     GlobalScope.launch {
+                        val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
+                        items.getFromApiUserData(nowGetIndex)
+//                        logi(TAG, "Insert to Post Value before，all Items is Bellow,,,Item Size is ===>${items.size}")
+//                        items.logiAllData(TAG)
                         listLiveData.postValue(items)
-                        delay(3000)
+
                         liveLoadingOver.postValue(true)
                     }
-
-//                    logi(TAG, "030 now loadingOver===>$loadingOver")
                 }
             })
-
-//            logi(TAG," now loadingOVer is===>${loadingOver?.value?:"it is no data!!!"}")
-////            mBinding.tvNoDataFound.visibility = View.GONE
-////            mBinding.pgLoading.visibility = View.VISIBLE
-//            GlobalScope.launch {
-//                //First need check BaseSharePreference have get this Index,If not , call API
-//                logi(TAG, "alreadygetIndexArray is ===>$alreadygetIndexArray")
-//                if (!alreadygetIndexArray.contains(startGetIndex))
-//                    getFromApiUserData(startGetIndex)
-//
-//                // printData To check
-//                val dataSet = BaseSharePreference.getUserListData(context, startGetIndex)
-//                logi(TAG, "The Stored Data is Below,total ${dataSet.size} count")
-//                dataSet.logiAllData()
-//
-//                if (dataSet.size < 100)
-//                    getFromApiUserData(dataSet.last().id)
-//
-////                Handler(Looper.getMainLooper()).post {
-//                liveLoadingOver.postValue(true)
-//                logi(TAG,"此時的loadingOVer是===>${loadingOver.value}")
-//////                    mBinding.pgLoading.visibility = View.GONE
-//////                    if(dataSet.isEmpty())
-//////                        mBinding.tvNoDataFound.visibility = View.VISIBLE
-////                }
-//            }
         }
 
         @Throws(Exception::class)
-        private fun getFromApiUserData(start: Int): ResponseBody? {
+        private fun ArrayList<UserModel>.getFromApiUserData(start: Int) {
             if (alreadygetIndexArray.contains(start))
-                return null
+                return
             val cell = ApiConnect.getService(context).getUserData(start)
             logi(TAG, "Start Call API,To Get getFromApiUserData Method")
 
@@ -199,20 +132,23 @@ class MainActivity : AppCompatActivity() {
             logi(TAG, "getFromApiUserData Send Data is===>${response ?: "null"}")
             if (response.isSuccessful) {
                 logi(TAG, "getFromApiUserData Get Data is Below,total ${response?.body()?.size ?: 0} count")
-                BaseSharePreference.saveUserListData(context, response?.body())
+                BaseSharePreference.saveUserSetData(context, response?.body())
 
                 // store have get Index to BaseSharePreference
 
                 alreadygetIndexArray.add(start)
                 BaseSharePreference.setGetIndexs(context, alreadygetIndexArray)
 
+                this.addAll(response.body() ?: mutableListOf())
                 response?.body()?.logiAllData()
-                if (limitGetIndex > start)
-                    getFromApiUserData(start + 30)
-            }
-            return response.errorBody()
-        }
 
+                if (limitGetIndex > start)
+                    this.getFromApiUserData(start + 30)
+                else
+                    return
+            }
+            return
+        }
 
     }
 
@@ -227,27 +163,46 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private class UserAdapter(val context: Context) : BaseRecyclerViewViewModelAdapter<UserModel>(context, R.layout.adapter_user_list) {
-        override fun initViewHolder(viewHolder: ViewHolder) {
+    private class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+        val TAG = javaClass.simpleName
+        var list: List<UserModel>? = viewModel.listLiveData.value
 
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+
+            return ViewHolder.from(parent)
         }
 
-        override fun onBindViewHolder(viewHolder: ViewHolder, position: Int, data: UserModel) {
-
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = list!![position]
+            logi(TAG, "when onBindViewHolder,,,item is===>$item")
+            holder.bind(viewModel, item)
         }
 
-        override fun onItemClick(view: View, position: Int, data: UserModel): Boolean {
-            return false
+        override fun getItemCount(): Int {
+            return list?.count() ?: 0
         }
 
-        override fun onItemLongClick(view: View, position: Int, data: UserModel): Boolean {
-            return false
-        }
+        class ViewHolder private constructor(private val binding: AdapterUserListBinding) :
+            RecyclerView.ViewHolder(binding.root) {
+            val TAG = javaClass.simpleName
 
-        override fun search(constraint: CharSequence, list: ArrayList<UserModel>): ArrayList<UserModel> {
-            return list
-        }
+            fun bind(viewModel: UserViewModel, item: UserModel) {
+                logi(TAG, "when bind,,,item is===>$item")
+                binding.viewModel = viewModel
+                binding.userModel = item
+                bindImage(binding.ivAvatar, item.avatarUrl)
+                binding.executePendingBindings()
+            }
 
+            companion object {
+                fun from(parent: ViewGroup): ViewHolder {
+                    val layoutInflater = LayoutInflater.from(parent.context)
+                    val binding = AdapterUserListBinding.inflate(layoutInflater, parent, false)
+
+                    return ViewHolder(binding)
+                }
+            }
+        }
 
     }
 
