@@ -113,6 +113,10 @@ object BaseSharePreference {
     fun getNowStartIndex(context: Context): Int {
         return getInt(context, KEY_GET_DATA_START_INDEX, 0)
     }
+    /**get limit Index by store and plus*/
+    fun getNowLimitndex(context: Context): Int {
+        return getInt(context, KEY_GET_DATA_START_INDEX, 0)+120
+    }
 
     /** set indexes */
     fun setGetIndexs(context: Context, array: TreeSet<Int>) {

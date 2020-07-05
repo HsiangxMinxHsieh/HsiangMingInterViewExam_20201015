@@ -6,7 +6,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timmymike.hsiangminginterviewexam_20200629.api.ApiConnect
@@ -43,25 +46,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        BaseSharePreference.setNowGetIndex(context, 0)
+        BaseSharePreference.setNowGetIndex(context,  10000)
         val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
         viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context, nowGetIndex), context)).get(UserViewModel::class.java)
 
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
 
-        adapter = UserAdapter(viewModel)
-        mainBinding.rvUserList.adapter = adapter
         mainBinding.rvUserList.layoutManager = LinearLayoutManager(context).apply {
             orientation = RecyclerView.VERTICAL
         }
 
+        adapter = UserAdapter(viewModel)
+        mainBinding.rvUserList.adapter = adapter
+
         viewModel.listLiveData.observe(this,
             Observer<List<UserModel>> {
-                logi(TAG,"now Data is===>$it")
+                logi(TAG, "now Data size is===>${it.size}")
+//                adapter.list = viewModel.listLiveData.value
                 adapter.notifyDataSetChanged()
             })
-
     }
 
     /**======== MVVM ========*/
@@ -93,28 +97,36 @@ class MainActivity : AppCompatActivity() {
 
     class UserViewModel(private val repository: IRepository, val context: Context) : ViewModel() {
         val TAG = javaClass.simpleName
-        val listLiveData: MutableLiveData<List<UserModel>> by lazy { MutableLiveData<List<UserModel>>() }
+        val listLiveData: MutableLiveData<ArrayList<UserModel>> by lazy { MutableLiveData<ArrayList<UserModel>>(ArrayList()) }
         val liveLoadingOver: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() } // According this value To Show now Status
 
         init {
-            getData()
+            getData(BaseSharePreference.getNowStartIndex(context))
         }
 
         private val alreadygetIndexArray by lazy { BaseSharePreference.getGetIndexs(context) }
 
-        var limitGetIndex = 120
-
-        private fun getData() {
+        private fun getData(nowGetIndex: Int) {
             liveLoadingOver.postValue(false)
             repository.getItems(object : IRepository.ItemCallback {
                 override fun onItemsResult(items: ArrayList<UserModel>) {
                     GlobalScope.launch {
-                        val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
-                        items.getFromApiUserData(nowGetIndex)
-//                        logi(TAG, "Insert to Post Value before，all Items is Bellow,,,Item Size is ===>${items.size}")
-//                        items.logiAllData(TAG)
-                        listLiveData.postValue(items)
+                        logi(TAG, "010 now listLiveData size is ===>${listLiveData.value?.size} ")
 
+                        items.getFromApiUserData(nowGetIndex)
+
+//                        val list = ArrayList<UserModel>()
+//                        list.addAll(listLiveData.value?.toList() ?: mutableListOf())
+//                        list.addAll(items)
+                        logi(TAG, "Insert to Post Value before，all List is Bellow,,,list Size is ===>${items.size}")
+//                        list.logiAllData(TAG)
+
+//                        listLiveData.postValue(list)
+                        listLiveData.value?.run {
+                            clear()
+                            addAll(items)
+                        }
+                        logi(TAG, "020 now listLiveData size is ===>${listLiveData.value?.size} ")
                         liveLoadingOver.postValue(true)
                     }
                 }
@@ -142,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 this.addAll(response.body() ?: mutableListOf())
                 response?.body()?.logiAllData()
 
-                if (limitGetIndex > start)
+                if (BaseSharePreference.getNowLimitndex(context) > start)
                     this.getFromApiUserData(start + 30)
                 else
                     return
@@ -159,7 +171,6 @@ class MainActivity : AppCompatActivity() {
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
-
     }
 
 
@@ -173,9 +184,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = list!![position]
-            logi(TAG, "when onBindViewHolder,,,item is===>$item")
-            holder.bind(viewModel, item)
+//            logi(TAG, "when onBindViewHolder,,,list is===>$list")
+            if (list != null && list!!.isNotEmpty()) {
+                val item = list!![position]
+//                logi(TAG, "when onBindViewHolder,,,item is===>$item")
+                holder.bind(viewModel, item)
+            }
         }
 
         override fun getItemCount(): Int {
@@ -187,7 +201,7 @@ class MainActivity : AppCompatActivity() {
             val TAG = javaClass.simpleName
 
             fun bind(viewModel: UserViewModel, item: UserModel) {
-                logi(TAG, "when bind,,,item is===>$item")
+//                logi(TAG, "when bind,,,item is===>$item")
                 binding.viewModel = viewModel
                 binding.userModel = item
                 bindImage(binding.ivAvatar, item.avatarUrl)
