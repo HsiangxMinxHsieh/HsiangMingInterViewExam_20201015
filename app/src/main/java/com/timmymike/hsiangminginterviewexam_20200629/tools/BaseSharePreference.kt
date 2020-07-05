@@ -24,6 +24,9 @@ object BaseSharePreference {
     /**get data start index*/
     private val KEY_GET_DATA_START_INDEX = "KEY_GET_DATA_START_INDEX"
 
+    /**show data size (default=100)*/
+    private val KEY_DATA_SHOW_SIZE= "KEY_DATA_SHOW_SIZE"
+
     fun getString(
         context: Context,
         key: String,
@@ -113,9 +116,14 @@ object BaseSharePreference {
     fun getNowStartIndex(context: Context): Int {
         return getInt(context, KEY_GET_DATA_START_INDEX, 0)
     }
-    /**get limit Index by store and plus*/
-    fun getNowLimitndex(context: Context): Int {
-        return getInt(context, KEY_GET_DATA_START_INDEX, 0)+120
+    /** set show data size*/
+    fun setNowShowSize(context: Context, index: Int) {
+        putInt(context, KEY_DATA_SHOW_SIZE, index)
+    }
+
+    /**get show data size (default=100)*/
+    fun getNowShowSize(context: Context): Int {
+        return getInt(context, KEY_DATA_SHOW_SIZE, 100)
     }
 
     /** set indexes */
@@ -150,7 +158,7 @@ object BaseSharePreference {
         var index = startId
         var getDataSuccess = true
         var failCount = 0
-        while (set.size < 100 && getDataSuccess) {
+        while (set.size < getNowShowSize(context) && getDataSuccess) {
 
             try {
                 val data = Gson().fromJson(getString(context, "$KEY_USER_DATA_LIST $index", ""), UserModel::class.java) ?: null
@@ -174,6 +182,7 @@ object BaseSharePreference {
 //            logi(TAG, "getDataSuccess ==>$getDataSuccess,,,fail Count ===>$failCount")
             getDataSuccess = failCount <= 1000 //1000 is temp value ,it means that has fail 1000 times, then jump out this loop
         }
+
 
         return set
     }
