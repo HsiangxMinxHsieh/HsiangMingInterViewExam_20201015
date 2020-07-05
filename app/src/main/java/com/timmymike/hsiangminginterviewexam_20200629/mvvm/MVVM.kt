@@ -33,15 +33,11 @@ interface IRepository {
 class Repository(val context: Context, val startGetIndex: Int) : IRepository {
     val TAG = javaClass.simpleName
     override fun getItems(itemCallback: IRepository.ItemCallback) {
-//            val list = mutableListOf<UserModel>()
         // printData To check
 //            logi(TAG, "startGetIndex ===>$startGetIndex")
         val dataSet = BaseSharePreference.getUserSetData(context, startGetIndex)
 //            logi(TAG, "The Stored Data is Below,total ${dataSet.size} count")
-//            dataSet.logiAllData()
-        val arr = TreeSet<UserModel>()
-        arr.addAll(dataSet)
-        itemCallback.onItemsResult(arr)
+        itemCallback.onItemsResult(dataSet)
     }
 }
 
@@ -67,12 +63,12 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
                     logi(TAG, "Insert to Post Value before，all List is Bellow,,,list Size is ===>${items.size}")
                     val list = ArrayList<UserModel>()
                     list.addAll(items.toList())
-                    logi(TAG,"Before sublist，list size is===>${list.size}")
+                    logi(TAG, "Before sublist，list size is===>${list.size}")
                     list.logiAllData(TAG)
 
-                    val resultList =   ArrayList<UserModel>()
-                    val maxSize = if(list.size <BaseSharePreference.getNowShowSize(context))  list.size else BaseSharePreference.getNowShowSize(context)
-                    resultList.addAll(list.subList(0,maxSize))
+                    val resultList = ArrayList<UserModel>()
+                    val maxSize = if (list.size < BaseSharePreference.getNowShowSize(context)) list.size else BaseSharePreference.getNowShowSize(context)
+                    resultList.addAll(list.subList(0, maxSize))
 
                     listLiveData.postValue(resultList)
                     liveLoadingOver.postValue(true)
@@ -96,11 +92,14 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
         logi(TAG, "getFromApiUserData Send Data is===>${response ?: "null"}")
         if (response.isSuccessful) {
             logi(TAG, "getFromApiUserData Get Data is Below,total ${response?.body()?.size ?: 0} count")
+
+            // store get data in BaseSharePreference
             BaseSharePreference.saveUserSetData(context, response?.body())
 
             // store have get Index to BaseSharePreference
             alreadygetIndexArray.add(start)
             BaseSharePreference.setGetIndexs(context, alreadygetIndexArray)
+
 
             this.addAll(response.body() ?: mutableListOf())
             response?.body()?.logiAllData()
@@ -131,7 +130,6 @@ class ViewModelFactory(private val repository: Repository, private val context: 
 
 
 class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
-    val TAG = javaClass.simpleName
     var list: ArrayList<UserModel>? = viewModel.listLiveData.value
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -140,10 +138,8 @@ class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapt
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//            logi(TAG, "when onBindViewHolder,,,list is===>$list")
         if (list != null && list!!.isNotEmpty()) {
             val item = list!![position]
-//                logi(TAG, "when onBindViewHolder,,,item is===>$item")
             holder.bind(viewModel, item)
         }
     }
@@ -154,10 +150,8 @@ class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapt
 
     class ViewHolder private constructor(private val binding: AdapterUserListBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        val TAG = javaClass.simpleName
 
         fun bind(viewModel: UserViewModel, item: UserModel) {
-//                logi(TAG, "when bind,,,item is===>$item")
             binding.viewModel = viewModel
             binding.userModel = item
             val corner = 100
@@ -165,7 +159,7 @@ class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapt
             binding.tvStaff.setTextColor(viewModel.context.getColor(R.color.staff_color))
             binding.tvStaff.background = getRectangleBg(viewModel.context, corner, corner, corner, corner, R.color.staff_back, 0, 0)
             bindImage(binding.ivAvatar, item.avatarUrl)
-//                binding.executePendingBindings()
+            binding.executePendingBindings()
         }
 
         companion object {
