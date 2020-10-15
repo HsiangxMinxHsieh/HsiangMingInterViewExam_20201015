@@ -8,12 +8,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.timmymike.hsiangminginterviewexam_20200629.api.UserModel
+import com.timmymike.hsiangminginterviewexam_20200629.databinding.ActivityMainBinding
 import com.timmymike.hsiangminginterviewexam_20200629.mvvm.Repository
 import com.timmymike.hsiangminginterviewexam_20200629.mvvm.UserAdapter
 import com.timmymike.hsiangminginterviewexam_20200629.mvvm.UserViewModel
 import com.timmymike.hsiangminginterviewexam_20200629.mvvm.ViewModelFactory
-import com.timmymike.hsiangminginterviewexam_20200629.api.UserModel
-import com.timmymike.hsiangminginterviewexam_20200629.databinding.ActivityMainBinding
 import com.timmymike.hsiangminginterviewexam_20200629.tools.BaseSharePreference
 import com.timmymike.hsiangminginterviewexam_20200629.tools.logi
 import java.util.*

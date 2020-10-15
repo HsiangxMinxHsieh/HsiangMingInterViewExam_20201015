@@ -69,7 +69,7 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
                     val resultList = ArrayList<UserModel>()
                     val maxSize = if (list.size < BaseSharePreference.getNowShowSize(context)) list.size else BaseSharePreference.getNowShowSize(context)
                     resultList.addAll(list.subList(0, maxSize))
-
+                    logi(TAG, "after sublist，list size is===>${resultList.size}")
                     listLiveData.postValue(resultList)
                     liveLoadingOver.postValue(true)
                 }
