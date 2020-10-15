@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         BaseSharePreference.setNowGetIndex(context, 0)
 
         val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
-        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context, nowGetIndex), context)).get(UserViewModel::class.java)
+        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context.applicationContext, nowGetIndex), context.applicationContext)).get(UserViewModel::class.java)
 
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
