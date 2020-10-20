@@ -15,21 +15,29 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 /**======== View Model ========*/
-interface MemberIRepository {
+
+interface MemberInterfaceRepository {
     fun getItems(itemCallback: ItemCallback)
     interface ItemCallback {
         fun onItemsResult(items: UserDetailModel)
     }
 }
 
-class MemberRepository(val context: Context, val UserId: String) : MemberIRepository {
-    val TAG = javaClass.simpleName
-    override fun getItems(itemCallback: MemberIRepository.ItemCallback) {
-        // printData To check
+class MemberRepository(val context: Context, val UserId: String) : MemberInterfaceRepository {
+    override fun getItems(itemCallback: MemberInterfaceRepository.ItemCallback) {
         val userData = BaseSharePreference.getUserDetail(context, UserId)
         itemCallback.onItemsResult(userData)
     }
 
+}
+
+class ViewMemberFactory(private val repository: MemberRepository, private val context: Application, private val userId: String) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MemberDetailViewModel::class.java)) {
+            return MemberDetailViewModel(repository, context, userId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }
 
 class MemberDetailViewModel(val repository: MemberRepository, val context: Application, val userId: String) : AndroidViewModel(context) {
@@ -40,13 +48,14 @@ class MemberDetailViewModel(val repository: MemberRepository, val context: Appli
     val liveNeedFinish by lazy { MutableLiveData<Boolean>() }
     val liveUserData by lazy { MutableLiveData<UserDetailModel>() }
     val liveBlogUrl by lazy { MutableLiveData<String>() }
+
     init {
         logi(TAG, "userId===>$userId")
         initView()
     }
 
     private fun initView() {
-        repository.getItems(object : MemberIRepository.ItemCallback {
+        repository.getItems(object : MemberInterfaceRepository.ItemCallback {
 
             override fun onItemsResult(items: UserDetailModel) {
                 GlobalScope.launch {
@@ -71,7 +80,7 @@ class MemberDetailViewModel(val repository: MemberRepository, val context: Appli
             logi(TAG, "getPersonDetailFromApi Send Data is===>${response ?: "null"}")
             if (response.isSuccessful) {
                 logi(TAG, "getPersonDetailFromApi Get Data is ${response?.body()} ")
-                BaseSharePreference.setUserDetail(context, userId,response?.body() ?: UserDetailModel())
+                BaseSharePreference.setUserDetail(context, userId, response?.body() ?: UserDetailModel())
                 liveLoadingOver.postValue(true)
             }
         } catch (e: Exception) {
@@ -82,8 +91,9 @@ class MemberDetailViewModel(val repository: MemberRepository, val context: Appli
 
         return
     }
-    fun toBlog(blog:String){
-        if(blog.isNotBlank())
+
+    fun toBlog(blog: String) {
+        if (blog.isNotBlank())
             liveBlogUrl.postValue(blog)
     }
 
@@ -91,17 +101,3 @@ class MemberDetailViewModel(val repository: MemberRepository, val context: Appli
         liveNeedFinish.postValue(true)
     }
 }
-
-class ViewMemberFactory(private val repository: MemberRepository, private val context: Application, private val userId: String) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(MemberDetailViewModel::class.java)) {
-            return MemberDetailViewModel(repository, context, userId) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
-//class ViewMemberFactory(private val application: Application) : ViewModelProvider.NewInstanceFactory() {
-//    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-//        return MemberDetailViewModel(application, userId) as T
-//    }
-//}

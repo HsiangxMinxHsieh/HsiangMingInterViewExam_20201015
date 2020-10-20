@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserViewModel" />
+            type="com.timmymike.hsiangminginterviewexam_20201015.mvvm.MainViewModel" />
 
     </data>
 

@@ -7,11 +7,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.timmymike.hsiangminginterviewexam_20201015.R
 import com.timmymike.hsiangminginterviewexam_20201015.api.ApiConnect
 import com.timmymike.hsiangminginterviewexam_20201015.api.UserModel
 import com.timmymike.hsiangminginterviewexam_20201015.databinding.AdapterUserListBinding
-import com.timmymike.hsiangminginterviewexam_20201015.tools.*
+import com.timmymike.hsiangminginterviewexam_20201015.tools.BaseSharePreference
+import com.timmymike.hsiangminginterviewexam_20201015.tools.bindImage
+import com.timmymike.hsiangminginterviewexam_20201015.tools.logi
+import com.timmymike.hsiangminginterviewexam_20201015.tools.logiAllData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -19,32 +21,25 @@ import kotlin.collections.ArrayList
 
 /**======== MVVM ========*/
 
-interface IRepository {
-
+interface MainInterfaceRepository {
     fun getItems(itemCallback: ItemCallback)
-
     interface ItemCallback {
-
         fun onItemsResult(items: TreeSet<UserModel>)
     }
 }
 
-class MainRepository(val context: Context, val startGetIndex: Int) : IRepository {
-    val TAG = javaClass.simpleName
-    override fun getItems(itemCallback: IRepository.ItemCallback) {
-        // printData To check
-//            logi(TAG, "startGetIndex ===>$startGetIndex")
+class MainRepository(val context: Context, val startGetIndex: Int) : MainInterfaceRepository {
+    override fun getItems(itemCallback: MainInterfaceRepository.ItemCallback) {
         val dataSet = BaseSharePreference.getUserSetData(context, startGetIndex)
-//            logi(TAG, "The Stored Data is Below,total ${dataSet.size} count")
         itemCallback.onItemsResult(dataSet)
     }
 }
 
-class UserViewModel(private val repository: IRepository, val context: Context) : ViewModel() {
+class MainViewModel(private val repository: MainInterfaceRepository, val context: Context) : ViewModel() {
     val TAG = javaClass.simpleName
     val listLiveData: MutableLiveData<ArrayList<UserModel>> by lazy { MutableLiveData<ArrayList<UserModel>>(ArrayList()) }
     val liveLoadingOver: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() } // According this value To Show now Status
-    val liveToDetail:MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val liveToDetail: MutableLiveData<String> by lazy { MutableLiveData<String>() }
 
 
     init {
@@ -55,7 +50,7 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
 
     private fun getData(nowGetIndex: Int) {
         liveLoadingOver.postValue(false)
-        repository.getItems(object : IRepository.ItemCallback {
+        repository.getItems(object : MainInterfaceRepository.ItemCallback {
             override fun onItemsResult(items: TreeSet<UserModel>) {
                 GlobalScope.launch {
 
@@ -122,15 +117,15 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
 
 class ViewModelFactory(private val repository: MainRepository, private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            return UserViewModel(repository, context) as T
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            return MainViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
 
-class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(val viewModel: MainViewModel) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     var list: ArrayList<UserModel>? = viewModel.listLiveData.value
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -152,7 +147,7 @@ class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapt
     class ViewHolder private constructor(private val binding: AdapterUserListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(viewModel: UserViewModel, item: UserModel) {
+        fun bind(viewModel: MainViewModel, item: UserModel) {
             binding.viewModel = viewModel
             binding.userModel = item
 

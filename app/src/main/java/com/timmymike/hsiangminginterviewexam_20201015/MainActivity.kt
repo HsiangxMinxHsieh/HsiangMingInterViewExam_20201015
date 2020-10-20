@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.timmymike.hsiangminginterviewexam_20201015.api.UserModel
 import com.timmymike.hsiangminginterviewexam_20201015.databinding.ActivityMainBinding
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.MainRepository
+import com.timmymike.hsiangminginterviewexam_20201015.mvvm.MainViewModel
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserAdapter
-import com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserViewModel
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.ViewModelFactory
 import com.timmymike.hsiangminginterviewexam_20201015.tools.BaseSharePreference
 import com.timmymike.hsiangminginterviewexam_20201015.tools.logi
@@ -27,31 +27,36 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainBinding: ActivityMainBinding
     private lateinit var adapter: UserAdapter
-    private lateinit var viewModel: UserViewModel
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainBinding = DataBindingUtil.setContentView(activity, R.layout.activity_main)
 //        setContentView(R.layout.activity_main)
 
-        initView()
+        initMvvm()
+
+        initRecyclerView()
 
         initObserver()
 
     }
 
-
-    private fun initView() {
+    private fun initMvvm() {
         //default Setting：
         BaseSharePreference.setNowShowSize(context, 100)
 
         BaseSharePreference.setNowGetIndex(context, 0)
 
         val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
-        viewModel = ViewModelProvider(this, ViewModelFactory(MainRepository(context.applicationContext, nowGetIndex), context.applicationContext)).get(UserViewModel::class.java)
+        viewModel = ViewModelProvider(this, ViewModelFactory(MainRepository(context.applicationContext, nowGetIndex), context.applicationContext)).get(MainViewModel::class.java)
 
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
+
+    }
+
+    private fun initRecyclerView() {
 
         mainBinding.rvUserList.layoutManager = LinearLayoutManager(context).apply {
             orientation = RecyclerView.VERTICAL
@@ -59,7 +64,6 @@ class MainActivity : AppCompatActivity() {
 
         adapter = UserAdapter(viewModel)
         mainBinding.rvUserList.adapter = adapter
-
 
     }
 

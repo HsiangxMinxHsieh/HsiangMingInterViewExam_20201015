@@ -186,8 +186,6 @@ object BaseSharePreference {
 
     /**save data from API*/
     fun setUserDetail(context: Context, userId: String, userDetailModel: UserDetailModel) {
-        logi("UserDetail", "存入的Key是===>[$KEY_USER_DETAIL_DATA ${userId}],,,存入資料是===>$userDetailModel")
-        logi("UserDetail", "存入字串是===>${Gson().toJson(userDetailModel)}")
         putString(context, "$KEY_USER_DETAIL_DATA $userId", Gson().toJson(userDetailModel))
     }
 
@@ -196,7 +194,6 @@ object BaseSharePreference {
         var user = UserDetailModel()
         try {
             val storeString = getString(context, "$KEY_USER_DETAIL_DATA $userId", "{}")
-            logi("UserDetail", "取得的Key是===>[$KEY_USER_DETAIL_DATA ${userId}],,,取得字串是===>$storeString")
             user = Gson().fromJson(storeString, UserDetailModel::class.java)
         } catch (e: Exception) {
             e.printStackTrace()
