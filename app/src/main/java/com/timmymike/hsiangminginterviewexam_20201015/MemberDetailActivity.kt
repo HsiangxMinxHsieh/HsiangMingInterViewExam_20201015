@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -32,9 +34,9 @@ class MemberDetailActivity : AppCompatActivity() {
         logi("MemberDetailActivity", "啟動了")
         memberBinding = DataBindingUtil.setContentView(activity, R.layout.activity_member_detail)
 
-        initData()
-
         initView()
+
+        initData()
 
         initMvvm()
 
@@ -51,17 +53,23 @@ class MemberDetailActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+//        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
 
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // 什麼都不用寫
-        } else {
-            // 什麼都不用寫
+        if (supportActionBar != null) {
+            supportActionBar?.hide()
+        }
+        if (actionBar != null) {
+            actionBar?.hide()
         }
     }
+//
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            // Do nothing
+//        }
+//    }
 
     private fun initMvvm() {
         viewModel = ViewModelProvider(activity, ViewMemberFactory(MemberRepository(activity.applicationContext, userId ?: "0"), application, userId ?: "0")).get(MemberDetailViewModel::class.java)

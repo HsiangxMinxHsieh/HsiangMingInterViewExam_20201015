@@ -69,7 +69,8 @@ class MainActivity : AppCompatActivity() {
                 logi(TAG, "now Data size is===>${it.size}")
                 adapter.list = viewModel.listLiveData.value
                 adapter.notifyDataSetChanged()
-                activity.title = "${context.getString(R.string.app_name)} Number of items：${it.size}"
+//                activity.title = "${context.getString(R.string.app_name)} Number of items：${it.size}"
+                activity.title = "GitHub Users"
             })
 
         viewModel.liveToDetail.observe(activity,

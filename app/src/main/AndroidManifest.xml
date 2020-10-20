@@ -19,7 +19,7 @@
         </activity>
         <activity
             android:name=".MemberDetailActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:theme="@style/DetailTheme" />
         <!--        <activity android:name=".LoginActivity">-->
         <!--            <intent-filter>-->
         <!--                <action android:name="android.intent.action.MAIN" />-->

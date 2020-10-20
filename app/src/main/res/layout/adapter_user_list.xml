@@ -26,9 +26,9 @@
     <!--        app:cardElevation="2dp">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:onClick="@{() -> viewModel.openItem(String.valueOf(userModel.id))}">
 
         <TextView
@@ -36,6 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{String.valueOf(userModel.id)}"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/iv_avatar"
             app:layout_constraintStart_toStartOf="parent"
@@ -69,7 +70,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{userModel.login}" />
+                android:text="@{userModel.login}"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tv_staff"

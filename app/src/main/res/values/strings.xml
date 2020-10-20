@@ -1,8 +1,4 @@
 <resources>
     <string name="app_name">Access App</string>
 
-    <string name="member_id">ID:%1$s</string>
-    <string name="member_account">Account:%1$s</string>
-    <string name="member_password">Password:%1$s</string>
-
 </resources>
