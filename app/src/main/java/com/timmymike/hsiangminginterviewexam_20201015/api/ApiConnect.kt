@@ -12,14 +12,14 @@ object ApiConnect {
 
     private var apiService: ApiService? = null
 
-    fun getService(context: Context): ApiService {
+    fun getService(): ApiService {
         if (apiService == null) {
-            apiService = init(context)
+            apiService = init()
         }
-        return apiService ?: init(context)
+        return apiService ?: init()
     }
 
-    private fun init(context: Context): ApiService {
+    private fun init(): ApiService {
         val okHttpClient = OkHttpClient.Builder()
             .readTimeout(100, TimeUnit.SECONDS)
             .connectTimeout(100, TimeUnit.SECONDS)

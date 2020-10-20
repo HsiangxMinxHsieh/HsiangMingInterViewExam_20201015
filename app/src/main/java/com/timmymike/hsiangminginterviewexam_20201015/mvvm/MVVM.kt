@@ -85,7 +85,7 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
     private fun TreeSet<UserModel>.getFromApiUserData(start: Int) {
         if (alreadygetIndexArray.contains(start))
             return
-        val cell = ApiConnect.getService(context).getUserData(start)
+        val cell = ApiConnect.getService().getUserData(start)
         logi(TAG, "Start Call API,To Get getFromApiUserData Method")
 
         val response = cell.execute()
