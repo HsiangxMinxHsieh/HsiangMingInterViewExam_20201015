@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Access App</string>
-    <string name="title_activity_login">GitHubLogin</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Log in</string>
-    <string name="action_sign_in_short">Log in</string>
-    <string name="login_failed">"Login failed"</string>
+
+    <string name="member_id">ID:%1$s</string>
+    <string name="member_account">Account:%1$s</string>
+    <string name="member_password">Password:%1$s</string>
+
 </resources>

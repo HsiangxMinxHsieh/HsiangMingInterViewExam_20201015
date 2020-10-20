@@ -13,5 +13,5 @@ interface ApiService {
 
     @Headers("Content-Type: application/json", "Accept: application/json")
     @GET("/users/{name}")
-    fun getUserDetail(@Path("name") name: String): Call<ArrayList<UserDetailModel>>
+    fun getUserDetail(@Path("name") name: String): Call<UserDetailModel>
 }

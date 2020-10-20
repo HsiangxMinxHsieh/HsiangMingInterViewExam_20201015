@@ -50,5 +50,4 @@ data class UserModel(
         }
     }
 
-//    fun getId() = idOrgin.toString()
 }
