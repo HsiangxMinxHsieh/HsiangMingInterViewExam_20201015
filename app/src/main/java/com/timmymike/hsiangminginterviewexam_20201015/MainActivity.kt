@@ -1,6 +1,7 @@
 package com.timmymike.hsiangminginterviewexam_20201015
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -10,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.timmymike.hsiangminginterviewexam_20201015.api.UserModel
 import com.timmymike.hsiangminginterviewexam_20201015.databinding.ActivityMainBinding
-import com.timmymike.hsiangminginterviewexam_20201015.mvvm.Repository
+import com.timmymike.hsiangminginterviewexam_20201015.mvvm.MainRepository
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserAdapter
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserViewModel
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.ViewModelFactory
@@ -35,16 +36,19 @@ class MainActivity : AppCompatActivity() {
 
         initView()
 
+        initObserver()
+
     }
+
 
     private fun initView() {
         //default Setting：
-        BaseSharePreference.setNowShowSize(context,100)
+        BaseSharePreference.setNowShowSize(context, 100)
 
         BaseSharePreference.setNowGetIndex(context, 0)
 
         val nowGetIndex = BaseSharePreference.getNowStartIndex(context)
-        viewModel = ViewModelProvider(this, ViewModelFactory(Repository(context.applicationContext, nowGetIndex), context.applicationContext)).get(UserViewModel::class.java)
+        viewModel = ViewModelProvider(this, ViewModelFactory(MainRepository(context.applicationContext, nowGetIndex), context.applicationContext)).get(UserViewModel::class.java)
 
         mainBinding.viewModel = viewModel
         mainBinding.lifecycleOwner = activity
@@ -56,6 +60,10 @@ class MainActivity : AppCompatActivity() {
         adapter = UserAdapter(viewModel)
         mainBinding.rvUserList.adapter = adapter
 
+
+    }
+
+    private fun initObserver() {
         viewModel.listLiveData.observe(this,
             Observer<ArrayList<UserModel>> {
                 logi(TAG, "now Data size is===>${it.size}")
@@ -63,5 +71,17 @@ class MainActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
                 activity.title = "${context.getString(R.string.app_name)} Number of items：${it.size}"
             })
+
+        viewModel.liveToDetail.observe(activity,
+            Observer {
+                if (it != "") {
+                    val intent = Intent(context, MemberDetailActivity::class.java)
+                    intent.putExtra(MemberDetailActivity.KEY_USER_ID, it)
+                    activity.startActivity(intent)
+                }
+                viewModel.liveToDetail.postValue("")
+            }
+        )
     }
+
 }

@@ -3,6 +3,7 @@ package com.timmymike.hsiangminginterviewexam_20201015.tools
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.timmymike.hsiangminginterviewexam_20201015.api.UserDetailModel
 import com.timmymike.hsiangminginterviewexam_20201015.api.UserModel
 import java.util.*
 
@@ -25,14 +26,12 @@ object BaseSharePreference {
     private val KEY_GET_DATA_START_INDEX = "KEY_GET_DATA_START_INDEX"
 
     /**show data size (default=100)*/
-    private val KEY_DATA_SHOW_SIZE= "KEY_DATA_SHOW_SIZE"
+    private val KEY_DATA_SHOW_SIZE = "KEY_DATA_SHOW_SIZE"
 
-    fun getString(
-        context: Context,
-        key: String,
-        defValues: String,
-        tableName: String = TABLENAME
-    ): String {
+    /**user detail data*/
+    private val KEY_USER_DETAIL_DATA = "KEY_USER_DETAIL_DATA"
+
+    fun getString(context: Context, key: String, defValues: String, tableName: String = TABLENAME): String {
         val sharedPreferences = context.getSharedPreferences(tableName, 0)
         return sharedPreferences.getString(key, defValues) ?: defValues
     }
@@ -116,6 +115,7 @@ object BaseSharePreference {
     fun getNowStartIndex(context: Context): Int {
         return getInt(context, KEY_GET_DATA_START_INDEX, 0)
     }
+
     /** set show data size*/
     fun setNowShowSize(context: Context, index: Int) {
         putInt(context, KEY_DATA_SHOW_SIZE, index)
@@ -153,7 +153,6 @@ object BaseSharePreference {
 
     /**get data from store*/
     fun getUserSetData(context: Context, startId: Int): TreeSet<UserModel> {
-        val TAG = "getUserListData"
         val set = TreeSet<UserModel>()
         var index = startId
         var getDataSuccess = true
@@ -179,12 +178,31 @@ object BaseSharePreference {
             // avoid fail process
             if (!getDataSuccess)
                 failCount++
-//            logi(TAG, "getDataSuccess ==>$getDataSuccess,,,fail Count ===>$failCount")
             getDataSuccess = failCount <= 1000 //1000 is temp value ,it means that has fail 1000 times, then jump out this loop
         }
 
-
         return set
     }
+
+    /**save data from API*/
+    fun setUserDetail(context: Context, userId: String, userDetailModel: UserDetailModel) {
+        logi("UserDetail", "存入的Key是===>[$KEY_USER_DETAIL_DATA ${userId}],,,存入資料是===>$userDetailModel")
+        logi("UserDetail", "存入字串是===>${Gson().toJson(userDetailModel)}")
+        putString(context, "$KEY_USER_DETAIL_DATA $userId", Gson().toJson(userDetailModel))
+    }
+
+    /**get data from store*/
+    fun getUserDetail(context: Context, userId: String): UserDetailModel {
+        var user = UserDetailModel()
+        try {
+            val storeString = getString(context, "$KEY_USER_DETAIL_DATA $userId", "{}")
+            logi("UserDetail", "取得的Key是===>[$KEY_USER_DETAIL_DATA ${userId}],,,取得字串是===>$storeString")
+            user = Gson().fromJson(storeString, UserDetailModel::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return user
+    }
+
 
 }

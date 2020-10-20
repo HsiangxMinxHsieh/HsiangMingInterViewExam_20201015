@@ -1,5 +1,8 @@
 package com.timmymike.hsiangminginterviewexam_20201015
 
+import android.content.Intent
+import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -7,7 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.timmymike.hsiangminginterviewexam_20201015.databinding.ActivityMemberDetailBinding
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.MemberDetailViewModel
+import com.timmymike.hsiangminginterviewexam_20201015.mvvm.MemberRepository
 import com.timmymike.hsiangminginterviewexam_20201015.mvvm.ViewMemberFactory
+import com.timmymike.hsiangminginterviewexam_20201015.tools.logi
 
 class MemberDetailActivity : AppCompatActivity() {
     companion object {
@@ -16,7 +21,7 @@ class MemberDetailActivity : AppCompatActivity() {
     }
 
     private val activity = this
-    private var userId: Int? = null
+    private var userId: String? = null
 
     //    private var loginStatus = LoginMethod.Login
     private lateinit var viewModel: MemberDetailViewModel
@@ -24,7 +29,7 @@ class MemberDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        logi("MemberDetailActivity", "啟動了")
         memberBinding = DataBindingUtil.setContentView(activity, R.layout.activity_member_detail)
 
         initData()
@@ -39,7 +44,7 @@ class MemberDetailActivity : AppCompatActivity() {
 
     private fun initData() {
         try {
-            userId = intent.getIntExtra(KEY_USER_ID, 0)
+            userId = intent.getStringExtra(KEY_USER_ID) ?: ""
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -49,8 +54,17 @@ class MemberDetailActivity : AppCompatActivity() {
 
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // 什麼都不用寫
+        } else {
+            // 什麼都不用寫
+        }
+    }
+
     private fun initMvvm() {
-        viewModel = ViewModelProvider(activity, ViewMemberFactory(application, userId ?: 0)).get(MemberDetailViewModel::class.java)
+        viewModel = ViewModelProvider(activity, ViewMemberFactory(MemberRepository(activity.applicationContext, userId ?: "0"), application, userId ?: "0")).get(MemberDetailViewModel::class.java)
 
         memberBinding.viewModel = viewModel
         memberBinding.lifecycleOwner = activity
@@ -60,6 +74,17 @@ class MemberDetailActivity : AppCompatActivity() {
         viewModel.liveNeedFinish.observe(activity, Observer {
             if (it)
                 activity.finish()
+        })
+
+        viewModel.liveBlogUrl.observe(activity, Observer {
+            try {
+                val url = if (it.startsWith("http") ) it else "https://$it"
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(url)
+                activity.startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         })
     }
 }

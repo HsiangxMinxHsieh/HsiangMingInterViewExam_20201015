@@ -5,4 +5,6 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="staff_back">#5D6FDE</color>
     <color name="staff_color">#FFFFFF</color>
+    <color name="link_blue">#7592BF</color>
+    <color name="black">#000000</color>
 </resources>

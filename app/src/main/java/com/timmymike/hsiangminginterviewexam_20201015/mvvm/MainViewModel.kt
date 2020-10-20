@@ -3,7 +3,6 @@ package com.timmymike.hsiangminginterviewexam_20201015.mvvm
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -30,7 +29,7 @@ interface IRepository {
     }
 }
 
-class Repository(val context: Context, val startGetIndex: Int) : IRepository {
+class MainRepository(val context: Context, val startGetIndex: Int) : IRepository {
     val TAG = javaClass.simpleName
     override fun getItems(itemCallback: IRepository.ItemCallback) {
         // printData To check
@@ -45,6 +44,8 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
     val TAG = javaClass.simpleName
     val listLiveData: MutableLiveData<ArrayList<UserModel>> by lazy { MutableLiveData<ArrayList<UserModel>>(ArrayList()) }
     val liveLoadingOver: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() } // According this value To Show now Status
+    val liveToDetail:MutableLiveData<String> by lazy { MutableLiveData<String>() }
+
 
     init {
         getData(BaseSharePreference.getNowStartIndex(context))
@@ -77,8 +78,9 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
         })
     }
 
-    fun openItem(itemName: String) {
-        Toast.makeText(context, "You clicked $itemName", Toast.LENGTH_SHORT).show()
+    fun openItem(userId: String) {
+        liveToDetail.postValue(userId)
+//        Toast.makeText(context, "You clicked $userId", Toast.LENGTH_SHORT).show()
     }
 
     @Throws(Exception::class)
@@ -113,13 +115,12 @@ class UserViewModel(private val repository: IRepository, val context: Context) :
             else
                 return
         }
-        response?.body().toString()
         return
     }
 
 }
 
-class ViewModelFactory(private val repository: Repository, private val context: Context) : ViewModelProvider.Factory {
+class ViewModelFactory(private val repository: MainRepository, private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
             return UserViewModel(repository, context) as T
@@ -154,10 +155,10 @@ class UserAdapter(val viewModel: UserViewModel) : RecyclerView.Adapter<UserAdapt
         fun bind(viewModel: UserViewModel, item: UserModel) {
             binding.viewModel = viewModel
             binding.userModel = item
-            val corner = 100
 
-            binding.tvStaff.setTextColor(viewModel.context.getColor(R.color.staff_color))
-            binding.tvStaff.background = getRectangleBg(viewModel.context, corner, corner, corner, corner, R.color.staff_back, 0, 0)
+//            val corner = 100
+//            binding.tvStaff.setTextColor(viewModel.context.getColor(R.color.staff_color))
+//            binding.tvStaff.background = getRectangleBg(viewModel.context, corner, corner, corner, corner, R.color.staff_back, 0, 0)
             bindImage(binding.ivAvatar, item.avatarUrl)
             binding.executePendingBindings()
         }

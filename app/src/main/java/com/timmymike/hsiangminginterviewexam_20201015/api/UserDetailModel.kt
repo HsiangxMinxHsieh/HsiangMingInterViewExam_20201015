@@ -7,15 +7,15 @@ data class UserDetailModel(
     @SerializedName("avatar_url")
     var avatarUrl: String = "",
     @SerializedName("bio")
-    var bio: String? = "",
+    var bio: String = "",
     @SerializedName("blog")
     var blog: String = "",
     @SerializedName("company")
-    var company: String? = "",
+    var company: String = "",
     @SerializedName("created_at")
     var createdAt: String = "",
     @SerializedName("email")
-    var email: String? = "",
+    var email: String = "",
     @SerializedName("events_url")
     var eventsUrl: String = "",
     @SerializedName("followers")
@@ -31,13 +31,13 @@ data class UserDetailModel(
     @SerializedName("gravatar_id")
     var gravatarId: String = "",
     @SerializedName("hireable")
-    var hireable: Boolean? = false,
+    var hireable: Boolean = false,
     @SerializedName("html_url")
     var htmlUrl: String = "",
     @SerializedName("id")
     var id: Int = 0,
     @SerializedName("location")
-    var location: String? = "",
+    var location: String = "",
     @SerializedName("login")
     var login: String = "",
     @SerializedName("name")
@@ -61,7 +61,7 @@ data class UserDetailModel(
     @SerializedName("subscriptions_url")
     var subscriptionsUrl: String = "",
     @SerializedName("twitter_username")
-    var twitterUsername: String? = "",
+    var twitterUsername: String = "",
     @SerializedName("type")
     var type: String = "",
     @SerializedName("updated_at")

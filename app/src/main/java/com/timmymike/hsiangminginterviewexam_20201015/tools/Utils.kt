@@ -22,20 +22,17 @@ import java.time.LocalDateTime
 /**
  * GetRectangle BackGroundDrawable
  * */
-fun getRectangleBg(
-    context: Context,
-    tldp: Int, trdp: Int, bldp: Int, brdp: Int,
-    bgColorID: Int, strokeColorID: Int, strokeWidth: Int): GradientDrawable {
-    val tl =getPixelFromDpByDevice(context, tldp)
-    val tr =getPixelFromDpByDevice(context, trdp)
-    val bl =getPixelFromDpByDevice(context, bldp)
-    val br =getPixelFromDpByDevice(context, brdp)
+fun getRectangleBg(context: Context, tldp: Int, trdp: Int, bldp: Int, brdp: Int, bgColorID: Int, strokeColorID: Int, strokeWidth: Int): GradientDrawable {
+    val tl = getPixelFromDpByDevice(context, tldp)
+    val tr = getPixelFromDpByDevice(context, trdp)
+    val bl = getPixelFromDpByDevice(context, bldp)
+    val br = getPixelFromDpByDevice(context, brdp)
     return createShapeDrawable(context, bgColorID, floatArrayOf(tl.toFloat(), tl.toFloat(), tr.toFloat(), tr.toFloat(), br.toFloat(), br.toFloat(), bl.toFloat(), bl.toFloat()), getPixelFromDpByDevice(context, strokeWidth), strokeColorID, GradientDrawable.RECTANGLE)
 }
 
 fun createShapeDrawable(context: Context, colorID: Int, radii: FloatArray?, strokeWidth: Int, strokeColorID: Int, gradientDrawableShape: Int): GradientDrawable {
     val gradientDrawable = GradientDrawable()
-    gradientDrawable.setColor(context.resources.getColor(colorID))
+    gradientDrawable.setColor(context.getColor(colorID))
     if (radii != null) {
         gradientDrawable.cornerRadii = radii
     }
@@ -65,9 +62,9 @@ private val options by lazy {
 }
 
 @BindingAdapter("app:imageUrl")
-fun bindImage(imageView: ImageView, url: String) {
+fun bindImage(imageView: ImageView, url: String?) {
     Glide.with(imageView.context)
-        .load(url)
+        .load(url ?: R.drawable.ic_person_outline_black_24dp)
         .apply(options)
         .placeholder(R.drawable.ic_person_outline_black_24dp)
         .into(imageView)

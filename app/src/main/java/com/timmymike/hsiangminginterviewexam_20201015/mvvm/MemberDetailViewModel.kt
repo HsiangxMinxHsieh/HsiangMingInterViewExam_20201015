@@ -1,71 +1,107 @@
 package com.timmymike.hsiangminginterviewexam_20201015.mvvm
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.timmymike.hsiangminginterviewexam_20201015.api.ApiConnect
 import com.timmymike.hsiangminginterviewexam_20201015.api.UserDetailModel
+import com.timmymike.hsiangminginterviewexam_20201015.tools.BaseSharePreference
 import com.timmymike.hsiangminginterviewexam_20201015.tools.logi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Response
 
 /**======== View Model ========*/
+interface MemberIRepository {
+    fun getItems(itemCallback: ItemCallback)
+    interface ItemCallback {
+        fun onItemsResult(items: UserDetailModel)
+    }
+}
 
-class MemberDetailViewModel(private val context: Application, private val userId: Int) : AndroidViewModel(context) {
+class MemberRepository(val context: Context, val UserId: String) : MemberIRepository {
     val TAG = javaClass.simpleName
-    var personData:UserDetailModel? = null
-    var avatarUrl = ""
-    var name = ""
-    var bio = ""
-    var login = ""
-    var site_admin = false
-    var location = ""
-    var blog = ""
+    override fun getItems(itemCallback: MemberIRepository.ItemCallback) {
+        // printData To check
+        val userData = BaseSharePreference.getUserDetail(context, UserId)
+        itemCallback.onItemsResult(userData)
+    }
 
+}
+
+class MemberDetailViewModel(val repository: MemberRepository, val context: Application, val userId: String) : AndroidViewModel(context) {
+    val TAG = javaClass.simpleName
+    var personData: UserDetailModel? = null
+
+    val liveLoadingOver: MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() } // According this value To Show now Status
     val liveNeedFinish by lazy { MutableLiveData<Boolean>() }
-
+    val liveUserData by lazy { MutableLiveData<UserDetailModel>() }
+    val liveBlogUrl by lazy { MutableLiveData<String>() }
     init {
         logi(TAG, "userId===>$userId")
         initView()
     }
 
     private fun initView() {
-        val personData = getPersonDetailFromApi()?:return
-        avatarUrl = personData.avatarUrl
-        name = personData.name
-        bio = personData.bio?:""
-        login = personData.login
-        site_admin = personData.siteAdmin
-        location = personData.location?:""
-        blog = personData.blog
+        repository.getItems(object : MemberIRepository.ItemCallback {
+
+            override fun onItemsResult(items: UserDetailModel) {
+                GlobalScope.launch {
+                    getPersonDetailFromApi(userId)
+                    liveUserData.postValue(BaseSharePreference.getUserDetail(context, userId))
+                    liveLoadingOver.postValue(true)
+                }
+            }
+        })
     }
 
-    private fun getPersonDetailFromApi(): UserDetailModel? {
-        val cell = ApiConnect.getService().getUserDetail(userId.toString())
-        logi(TAG, "Start Call API,To Get getPersonDetailFromApi Method")
+    private fun getPersonDetailFromApi(userId: String) {
+        if (BaseSharePreference.getUserDetail(context, userId).id != 0)
+            return
+
         var response: Response<UserDetailModel>? = null
+        val cell = ApiConnect.getService().getUserDetail(userId)
+        logi(TAG, "Start Call API,To Get getPersonDetailFromApi Method")
+
         try {
             response = cell.execute()
             logi(TAG, "getPersonDetailFromApi Send Data is===>${response ?: "null"}")
             if (response.isSuccessful) {
                 logi(TAG, "getPersonDetailFromApi Get Data is ${response?.body()} ")
-                return response?.body()
+                BaseSharePreference.setUserDetail(context, userId,response?.body() ?: UserDetailModel())
+                liveLoadingOver.postValue(true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return response?.body()
-    }
+        response?.body()
 
+
+        return
+    }
+    fun toBlog(blog:String){
+        if(blog.isNotBlank())
+            liveBlogUrl.postValue(blog)
+    }
 
     fun back() {
         liveNeedFinish.postValue(true)
     }
 }
 
-class ViewMemberFactory(private val application: Application, private val userId: Int) : ViewModelProvider.NewInstanceFactory() {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return MemberDetailViewModel(application, userId) as T
+class ViewMemberFactory(private val repository: MemberRepository, private val context: Application, private val userId: String) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MemberDetailViewModel::class.java)) {
+            return MemberDetailViewModel(repository, context, userId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+//class ViewMemberFactory(private val application: Application) : ViewModelProvider.NewInstanceFactory() {
+//    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+//        return MemberDetailViewModel(application, userId) as T
+//    }
+//}
