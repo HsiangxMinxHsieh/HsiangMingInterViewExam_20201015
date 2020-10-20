@@ -1,4 +1,4 @@
-package com.timmymike.hsiangminginterviewexam_20200629.mvvm
+package com.timmymike.hsiangminginterviewexam_20201015.mvvm
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,11 +8,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.timmymike.hsiangminginterviewexam_20200629.R
-import com.timmymike.hsiangminginterviewexam_20200629.api.ApiConnect
-import com.timmymike.hsiangminginterviewexam_20200629.api.UserModel
-import com.timmymike.hsiangminginterviewexam_20200629.databinding.AdapterUserListBinding
-import com.timmymike.hsiangminginterviewexam_20200629.tools.*
+import com.timmymike.hsiangminginterviewexam_20201015.R
+import com.timmymike.hsiangminginterviewexam_20201015.api.ApiConnect
+import com.timmymike.hsiangminginterviewexam_20201015.api.UserModel
+import com.timmymike.hsiangminginterviewexam_20201015.databinding.AdapterUserListBinding
+import com.timmymike.hsiangminginterviewexam_20201015.tools.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*

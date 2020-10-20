@@ -10,11 +10,11 @@
 
         <variable
             name="userModel"
-            type="com.timmymike.hsiangminginterviewexam_20200629.api.UserModel" />
+            type="com.timmymike.hsiangminginterviewexam_20201015.api.UserModel" />
 
         <variable
             name="viewModel"
-            type="com.timmymike.hsiangminginterviewexam_20200629.mvvm.UserViewModel" />
+            type="com.timmymike.hsiangminginterviewexam_20201015.mvvm.UserViewModel" />
     </data>
 
     <androidx.cardview.widget.CardView

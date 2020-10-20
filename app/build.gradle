@@ -7,7 +7,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.timmymike.hsiangminginterviewexam_20200629"
+        applicationId 'com.timmymike.hsiangminginterviewexam_20201015'
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1

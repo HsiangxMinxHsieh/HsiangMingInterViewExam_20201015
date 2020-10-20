@@ -1,4 +1,4 @@
-package com.timmymike.hsiangminginterviewexam_20200629.tools
+package com.timmymike.hsiangminginterviewexam_20201015.tools
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -14,8 +14,8 @@ import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
-import com.timmymike.hsiangminginterviewexam_20200629.BuildConfig
-import com.timmymike.hsiangminginterviewexam_20200629.R
+import com.timmymike.hsiangminginterviewexam_20201015.BuildConfig
+import com.timmymike.hsiangminginterviewexam_20201015.R
 import java.time.LocalDateTime
 
 
